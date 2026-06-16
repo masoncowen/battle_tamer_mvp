@@ -6,6 +6,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"charm.land/lipgloss/v2/table"
 	"internal/combat"
+	"internal/engines/combatmenu"
 	"internal/creatures"
 )
 
@@ -30,12 +31,25 @@ func (cm CombatMap) Set(x, y int, c combat.Creature)		{ cm.data[y*cm.w+x] = c }
 func (cm CombatMap) Rows() int				{ return cm.w }
 func (cm CombatMap) Columns() int			{ return cm.h }
 
+var mapStyle = lipgloss.NewStyle().
+			Width(40).
+			Height(30).
+			Align(lipgloss.Center, lipgloss.Center).
+			BorderStyle(lipgloss.NormalBorder())
+var menuStyle = lipgloss.NewStyle().
+			Width(15).
+			Height(5).
+			Align(lipgloss.Center, lipgloss.Center).
+			BorderStyle(lipgloss.NormalBorder())
+
 type Model struct {
+	menu combatmenu.Model
 	combatMap CombatMap
 	conditions string
 }
 
 func InitialModel() Model {
+	menu := combatmenu.InitialModel()
 	mapWidth := 10
 	mapHeight := 10
 	combatMap := MakeCombatMap(mapWidth, mapHeight)
@@ -44,7 +58,7 @@ func InitialModel() Model {
 	// 		combatMap.Set(i, j, " ")
 	// 	}
 	// }
-	return Model{combatMap, "TODO Conditions"}
+	return Model{menu, combatMap, "TODO Conditions"}
 }
 
 func (m Model) Init() tea.Cmd {
@@ -52,12 +66,17 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q", "h", "left":
-			return m, tea.Quit
-		}
+		newCombatMenu, newCmd := m.menu.Update(msg)
+		combatMenu, ok := newCombatMenu.(combatmenu.Model)
+        if !ok {
+            panic("Could not perform assertion on combatmenu model")
+        }
+        m.menu = combatMenu
+        cmd = newCmd
+		return m, cmd
 	}
 	return m, nil
 }
@@ -68,6 +87,7 @@ func (m Model) View() tea.View {
 	m.combatMap.Set(4, 2, combat.Creature{"Wolf", creatures.GenericWolf, creatures.Personality{0,0,0,0,0}})
 	m.combatMap.Set(7, 6, combat.Creature{"Cannon", creatures.PlantCannon, creatures.Personality{0,0,0,0,0}})
 	t := table.New().BorderRow(true).Rows(table.DataToMatrix(m.combatMap)...)
-
-	return tea.NewView(lipgloss.JoinVertical(lipgloss.Center, s, t.Render()))
+	main_section := lipgloss.JoinHorizontal(lipgloss.Center, mapStyle.Render(t.Render()), menuStyle.Render(m.menu.View().Content))
+	full_screen := lipgloss.JoinVertical(lipgloss.Center, s, main_section)
+	return tea.NewView(full_screen)
 }

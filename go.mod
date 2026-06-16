@@ -8,6 +8,7 @@ require (
 	internal/creatures v0.1.0
 	internal/combat v0.1.0
 	internal/engines/combat v0.1.0
+	internal/engines/combatmenu v0.1.0
 	internal/engines/mainmenu v0.1.0
 	internal/engines/options v0.1.0
 )
@@ -18,6 +19,7 @@ replace (
 	internal/creatures => ./internal/creatures
 	internal/combat => ./internal/combat
 	internal/engines/combat => ./internal/engines/combat
+	internal/engines/combatmenu => ./internal/engines/combatmenu
 	internal/engines/mainmenu => ./internal/engines/mainmenu
 	internal/engines/options => ./internal/engines/options
 )
