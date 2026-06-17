@@ -25,11 +25,17 @@ type CombatMap  struct {
 	w, h int
 	data []combat.Creature
 }
-func MakeCombatMap(w, h int) CombatMap 		{ return CombatMap{w, h, make([]combat.Creature, w*h)} }
-func (cm CombatMap) At(x, y int) string		{ return cm.data[y*cm.w+x].GetIcon() }
-func (cm CombatMap) Set(x, y int, c combat.Creature)		{ cm.data[y*cm.w+x] = c }
-func (cm CombatMap) Rows() int				{ return cm.w }
-func (cm CombatMap) Columns() int			{ return cm.h }
+func MakeCombatMap(w, h int) CombatMap 					{ return CombatMap{w, h, make([]combat.Creature, w*h)} }
+func (cm CombatMap) At(x, y int) string					{ return cm.data[y*cm.w+x].GetIcon() }
+func (cm CombatMap) Get(x, y int) combat.Creature		{ return cm.data[y*cm.w+x] }
+func (cm CombatMap) Set(x, y int, c combat.Creature)	{ cm.data[y*cm.w+x] = c }
+func (cm CombatMap) UpdateEntity(e Entity)	{
+	x := e.position[1]
+	y := e.position[0]
+	cm.data[y*cm.w+x] = e.base_creature
+}
+func (cm CombatMap) Rows() int							{ return cm.w }
+func (cm CombatMap) Columns() int						{ return cm.h }
 
 var mapStyle = lipgloss.NewStyle().
 			Width(40).
@@ -42,9 +48,17 @@ var menuStyle = lipgloss.NewStyle().
 			Align(lipgloss.Center, lipgloss.Center).
 			BorderStyle(lipgloss.NormalBorder())
 
+type Entity struct {
+	base_creature combat.Creature
+	position [2]int
+	team int
+	leads_team int
+}
+			
 type Model struct {
 	menu combatmenu.Model
 	combatMap CombatMap
+	entities []Entity
 	conditions string
 }
 
@@ -53,12 +67,17 @@ func InitialModel() Model {
 	mapWidth := 10
 	mapHeight := 10
 	combatMap := MakeCombatMap(mapWidth, mapHeight)
-	// for i:=0; i<mapHeight; i++ {
-	// 	for j:=0; j<mapWidth; j++ {
-	// 		combatMap.Set(i, j, " ")
-	// 	}
-	// }
-	return Model{menu, combatMap, "TODO Conditions"}
+	entities := []Entity{
+		Entity{combat.Creature{"Dog", creatures.GenericWolf, creatures.Personality{0,0,0,0,0}}, [2]int{2, 7}, 1, 0,},
+		Entity{combat.Creature{"Person", creatures.NoSpecies, creatures.Personality{0,0,0,0,0}}, [2]int{2, 4}, 1, 1,},
+		Entity{combat.Creature{"Wolf", creatures.GenericWolf, creatures.Personality{0,0,0,0,0}}, [2]int{6, 7}, 2, 2,},
+		Entity{combat.Creature{"Cannon", creatures.PlantCannon, creatures.Personality{0,0,0,0,0}}, [2]int{9, 4}, 2, 0,},
+	}
+	for i:=0; i<len(entities); i++ {
+		e := entities[i]
+		combatMap.UpdateEntity(e)
+	}
+	return Model{menu, combatMap, entities, "TODO Conditions"}
 }
 
 func (m Model) Init() tea.Cmd {
@@ -76,6 +95,35 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         }
         m.menu = combatMenu
         cmd = newCmd
+		if cmd == nil {
+			return m, nil
+		}
+		switch cmd := cmd().(type) {
+		case combatmenu.MoveCharacterMsg:
+			var entityID = 0
+			for i:=0; i<len(m.entities); i++ {
+				// m.entities[i].base_creature.Rename("Zombie")
+				if m.entities[i].leads_team == 1 {
+					// m.entities[i].base_creature.Rename("Leader")
+					entityID = i
+				}
+				// m.combatMap.UpdateEntity(m.entities[i])
+			}
+			for i:=0; i<len(cmd.Path); i++ {
+				x := m.entities[entityID].position[0]
+				y := m.entities[entityID].position[1]
+				tmp := m.combatMap.Get(y, x)
+				if cmd.Path[i] == 'N' {
+					m.combatMap.Set(y, x, m.combatMap.Get(y-1, x))
+					m.combatMap.Set(y-1, x, tmp)
+					m.entities[entityID].position[1] -= 1
+				} else if cmd.Path[i] == 'E' {
+					m.combatMap.Set(y, x, m.combatMap.Get(y, x+1))
+					m.combatMap.Set(y, x+1, tmp)
+					m.entities[entityID].position[0] += 1
+				}
+			}
+		}
 		return m, cmd
 	}
 	return m, nil
@@ -83,9 +131,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) View() tea.View {
     s := "Battle Tamer v.0.mvp.1\n\n"
-	m.combatMap.Set(3, 2, combat.Creature{"Dog", creatures.GenericWolf, creatures.Personality{0,0,0,0,0}})
-	m.combatMap.Set(4, 2, combat.Creature{"Wolf", creatures.GenericWolf, creatures.Personality{0,0,0,0,0}})
-	m.combatMap.Set(7, 6, combat.Creature{"Cannon", creatures.PlantCannon, creatures.Personality{0,0,0,0,0}})
 	t := table.New().BorderRow(true).Rows(table.DataToMatrix(m.combatMap)...)
 	main_section := lipgloss.JoinHorizontal(lipgloss.Center, mapStyle.Render(t.Render()), menuStyle.Render(m.menu.View().Content))
 	full_screen := lipgloss.JoinVertical(lipgloss.Center, s, main_section)

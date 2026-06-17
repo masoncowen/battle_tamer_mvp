@@ -24,6 +24,11 @@ func (o menuOptions) String() string {
     return "ERROR"
 }
 
+type MoveCharacterMsg struct {
+	Path []rune
+}
+type IssueCommandMsg struct {}
+
 type Model struct {
     activeMenuOptions []menuOptions
     cursor int
@@ -54,10 +59,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         case "enter", " ", "l", "right":
             switch m.activeMenuOptions[m.cursor] {
             case moveCharacter:
-                // return m, func() tea.Msg { return StartCombatMsg{} }
-                return m, nil
+				return m, func() tea.Msg { return MoveCharacterMsg{Path: []rune{'N',},} }
             case issueCommand:
-                return m, nil
+                // return m, func() tea.Msg { return IssueCommandMsg{} }
+				return m, func() tea.Msg { return MoveCharacterMsg{Path: []rune{'E',},} }
             }
         }
     }

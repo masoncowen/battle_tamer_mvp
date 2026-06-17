@@ -21,6 +21,10 @@ func (c Creature) String() string {
 	return string(c.Name[0])
 }
 
+func (c Creature) Rename(s string) {
+	c.Name = s
+}
+
 func (c Creature) GetIcon() string {
  	if len(c.Name) == 0 { return " " }
 	return string(c.Name[0])
