@@ -5,5 +5,7 @@
   - [x] Add Action Menu
     - [x] Add Move Option
   - [ ] Implement Move Option
-  - [ ] Implement Command Option
+    - [x] Move a entity based on criteria
+    - [ ] Select path before processing move
+  - [ ] Implement Command Option (Currently being used as a Move option)
 - [ ] Load battles from file rather than hard-coded
