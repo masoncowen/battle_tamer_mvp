@@ -7,5 +7,16 @@
   - [ ] Implement Move Option
     - [x] Move a entity based on criteria
     - [ ] Select path before processing move
+      - [ ] Select the first movement
+      - [ ] Select two movements
+      - [ ] Select n movements (this may just be part of 2-movements)
+  - [ ] Implement basic decision-making (LLms have ruined the word AI)
+    - [ ] Implement decision-making based on Creature Personality
   - [ ] Implement Command Option (Currently being used as a Move option)
+  - [ ] Implement action-scheduler
+  - [ ] Implement attack and health systems
+  - [ ] Implement environment conditions
+  - [ ] Add colour to 'sprites' based on player vs player creatures vs enemies
+- [ ] Add panel at the top for action-schedule
+- [ ] Add panel above commands giving information on entities
 - [ ] Load battles from file rather than hard-coded
