@@ -16,7 +16,11 @@
   - [ ] Implement action-scheduler
   - [ ] Implement attack and health systems
   - [ ] Implement environment conditions
-  - [ ] Add colour to 'sprites' based on player vs player creatures vs enemies
+  - [x] Add colour to 'sprites' based on player vs player creatures vs enemies
 - [ ] Add panel at the top for action-schedule
 - [ ] Add panel above commands giving information on entities
+    - [x] List Names
+    - [ ] Group based on Team
+    - [ ] Show health
 - [ ] Load battles from file rather than hard-coded
+- [ ] Create list of todos for v.0.mvp.1

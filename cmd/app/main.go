@@ -11,6 +11,7 @@ import (
 	// "time"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 )
 
 type sessionState int
@@ -87,15 +88,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() tea.View {
+    s := "Battle Tamer v.0.mvp.1\n"
+	content := ""
     switch m.state {
     case mainMenuView:
-        return m.mainmenu.View()
+        content =  m.mainmenu.View().Content
     case optionsView:
-        return m.options.View()
+        content =  m.options.View().Content
 	case combatView:
-		return m.combat.View()
+        content =  m.combat.View().Content
     }
-    return tea.NewView("Invalid Model has been selected")
+	if content == "" {
+		return tea.NewView("Invalid Model has been selected")
+	}
+	return tea.NewView(lipgloss.JoinVertical(lipgloss.Center, s, content))
 }
 
 func main() {

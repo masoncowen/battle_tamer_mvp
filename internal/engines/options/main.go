@@ -75,7 +75,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() tea.View {
-    s := "Battle Tamer v.0.mvp.1\n\n"
+    s := ""
     for i, option := range activeMenuOptions {
         cursor := " "
         if m.cursor == i {
